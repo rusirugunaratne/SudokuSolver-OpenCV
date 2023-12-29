@@ -7,6 +7,7 @@ heightImg = 576
 widthImg = 576
 board_size = 16
 
+
 # processing the image
 img = cv2.imread(pathImage)
 img = cv2.resize(img, (widthImg, heightImg))

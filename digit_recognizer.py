@@ -1,7 +1,7 @@
 import numpy as np
 import easyocr
 
-def digit_recognizer(boxes, board_size):
+def digit_recognizer(boxes, board_size, margin=2):
     reader = easyocr.Reader(['en'])
 
     board = np.zeros((board_size, board_size), dtype=int)
@@ -9,6 +9,10 @@ def digit_recognizer(boxes, board_size):
     for i in range(board_size):
         for j in range(board_size):
             roi = boxes[i * board_size + j]
+
+            # Crop a small margin from the borders of the box
+            roi_height, roi_width = roi.shape[:2]
+            roi = roi[margin:roi_height-margin, margin:roi_width-margin]
 
             # Use EasyOCR to recognize the digit
             result = reader.readtext(roi)
