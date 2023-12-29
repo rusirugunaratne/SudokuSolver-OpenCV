@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-
+from digit_recognizer import digit_recognizer
 
 def predict_numbers(boxes, model):
     numbers = []
@@ -79,3 +79,34 @@ def print_sudoku_board(sudoku_board, grid_size):
             value = sudoku_board[i * grid_size + j]
 
         print()
+
+
+def process_image(path_image, height_img, width_img, board_size):
+    img = cv2.imread(path_image)
+    img = cv2.resize(img, (width_img, height_img))
+    img_blank = np.zeros((height_img, width_img, 3), np.uint8)
+    img_threshold = preProcess(img)
+
+    # Finding the contours
+    img_contours = img.copy()
+    img_big_contour = img.copy()
+    contours, hierarchy = cv2.findContours(img_threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(img_contours, contours, -1, (0, 255, 0), 3)
+
+    # Finding the biggest contour
+    biggest, max_area = biggestContour(contours)
+    if biggest.size != 0:
+        biggest = reorder(biggest)
+        cv2.drawContours(img_big_contour, biggest, -1, (0, 0, 255), 10)
+        pts1 = np.float32(biggest)
+        pts2 = np.float32([[0, 0], [width_img, 0], [0, height_img], [width_img, height_img]])
+        matrix = cv2.getPerspectiveTransform(pts1, pts2)
+        img_warp_colored = cv2.warpPerspective(img, matrix, (width_img, height_img))
+        img_detected_digits = img_blank.copy()
+        img_warp_colored = cv2.cvtColor(img_warp_colored, cv2.COLOR_BGR2GRAY)
+
+    img_solved_digits = img_blank.copy()
+    boxes = splitBoxes(img_warp_colored, board_size)
+
+    board = digit_recognizer(boxes, board_size)
+    return board

@@ -1,40 +1,13 @@
-from digit_recognizer import *
-from app_utils import *
-import cv2
+from app_utils import process_image
 
-pathImage = "resources/16.png"
-heightImg = 576
-widthImg = 576
-board_size = 16
+def main():
+    path_image = "resources/16.png"
+    height_img = 576
+    width_img = 576
+    board_size = 16
 
+    result_board = process_image(path_image, height_img, width_img, board_size)
+    print(result_board)
 
-# processing the image
-img = cv2.imread(pathImage)
-img = cv2.resize(img, (widthImg, heightImg))
-imgBlank = np.zeros((heightImg, widthImg, 3), np.uint8)
-imgThreshold = preProcess(img)
-
-# finding the contours
-imgContours = img.copy()
-imgBigContour = img.copy()
-contours, hierarchy = cv2.findContours(imgThreshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-cv2.drawContours(imgContours, contours, -1, (0, 255, 0), 3)
-
-# finding the biggest contour
-biggest, maxArea = biggestContour(contours)
-if biggest.size != 0:
-    biggest = reorder(biggest)
-    cv2.drawContours(imgBigContour, biggest, -1, (0, 0, 255), 10)
-    pts1 = np.float32(biggest)
-    pts2 = np.float32([[0,0], [widthImg, 0], [0, heightImg], [widthImg, heightImg]])
-    matrix = cv2.getPerspectiveTransform(pts1, pts2)
-    imgWarpColored = cv2.warpPerspective(img, matrix, (widthImg, heightImg))
-    imgDetectedDigits = imgBlank.copy()
-    imgWarpColored = cv2.cvtColor(imgWarpColored, cv2.COLOR_BGR2GRAY)
-
-
-imgSolvedDigits = imgBlank.copy()
-boxes = splitBoxes(imgWarpColored, board_size)
-
-board = digit_recognizer(boxes, board_size)
-print(board)
+if __name__ == "__main__":
+    main()

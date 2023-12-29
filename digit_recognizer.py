@@ -23,3 +23,5 @@ def digit_recognizer(boxes, board_size, margin=2):
                 board[i, j] = digit
 
     return board
+
+
